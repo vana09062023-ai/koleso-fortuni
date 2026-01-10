@@ -2,9 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Колесо Фортуны</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Oswald:wght@700&family=Pacifico&family=Press+Start+2P&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Колесо Фортуны Deluxe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@700&family=Pacifico&family=Press+Start+2P&family=Unbounded:wght@900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -16,90 +16,114 @@
             --bg-dark: #0a0a12;
             --text: #ffffff;
             --blur: 25px;
-            --wheel-font: 'Inter';
         }
 
         * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
 
         body {
             font-family: 'Inter', sans-serif;
-            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
-            background-color: var(--bg-dark); color: var(--text); overflow: hidden;
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-dark); color: var(--text); overflow-x: hidden; padding: 15px;
         }
 
+        /* Индикатор Беты */
+        .beta-badge {
+            position: absolute; top: 15px; right: 20px;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
+            padding: 6px 14px; border-radius: 100px; font-size: 10px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 2px; color: var(--accent);
+            backdrop-filter: blur(5px); z-index: 100;
+        }
+
+        /* Фон */
+        #snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+        .snowflake { position: absolute; background: white; border-radius: 50%; top: -10px; }
         .bg-blobs { position: fixed; inset: 0; z-index: -1; filter: blur(80px); opacity: 0.6; }
-        .blob { position: absolute; width: 600px; height: 600px; background: var(--accent); border-radius: 50%; animation: move 20s infinite alternate; }
+        .blob { position: absolute; width: 400px; height: 400px; background: var(--accent); border-radius: 50%; animation: move 20s infinite alternate; }
         @keyframes move { from { transform: translate(-10%, -10%); } to { transform: translate(80%, 40%); } }
 
+        /* Карточка */
         .glass-card {
-            width: 1100px; height: 820px; background: var(--glass);
+            width: 100%; max-width: 1100px; background: var(--glass);
             backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
             border: 1px solid var(--border); border-radius: 40px;
             box-shadow: 0 40px 100px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative;
         }
 
-        .top-nav { display: flex; padding: 25px 40px; gap: 30px; border-bottom: 1px solid var(--border); }
-        .nav-item { font-size: 14px; font-weight: 700; text-transform: uppercase; cursor: pointer; opacity: 0.5; letter-spacing: 1px; }
+        .top-nav { display: flex; padding: 25px 30px; gap: 25px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+        .nav-item { font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; opacity: 0.5; white-space: nowrap; }
         .nav-item.active { opacity: 1; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 5px; }
 
-        .content-body { flex: 1; display: none; padding: 35px; gap: 35px; overflow: hidden; }
-        .content-body.active { display: flex; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-body { display: none; padding: 30px; gap: 30px; }
+        .content-body.active { display: flex; animation: fadeIn 0.4s ease; }
 
-        .wheel-section { flex: 1.2; position: relative; display: flex; justify-content: center; align-items: center; }
+        /* Десктопная и мобильная логика */
+        @media (min-width: 900px) {
+            .content-body { flex-direction: row; height: 750px; }
+            .sidebar { flex: 0.7; overflow-y: auto; padding-right: 10px; }
+            .wheel-section { flex: 1.3; }
+        }
+        @media (max-width: 899px) {
+            .content-body { flex-direction: column-reverse; height: auto; padding: 20px; }
+            .glass-card { margin-top: 40px; border-radius: 25px; }
+            .win-prize { font-size: 3rem !important; }
+            canvas { width: 100% !important; height: auto !important; }
+        }
+
+        /* Элементы */
+        .wheel-section { position: relative; display: flex; justify-content: center; align-items: center; }
         .pointer {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 0px; left: 50%; transform: translateX(-50%);
             width: 35px; height: 45px; background: white; clip-path: polygon(100% 0, 50% 100%, 0 0); z-index: 10;
         }
 
-        .sidebar { flex: 0.8; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 10px; }
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
         .setting-card { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 25px; border: 1px solid var(--border); }
-        .setting-card h4 { margin: 0 0 15px 0; font-size: 13px; color: var(--accent); text-transform: uppercase; }
-
-        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        input[type=range] { accent-color: var(--accent); cursor: pointer; }
-
-        /* Стилизация выбора шрифта */
-        .font-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .font-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px;
-            border-radius: 12px; color: white; cursor: pointer; text-align: center; font-size: 14px;
-        }
-        .font-btn:hover { background: rgba(255,255,255,0.1); }
-        .font-btn.active { border-color: var(--accent); background: rgba(125, 95, 255, 0.2); color: var(--accent); }
+        .setting-card h4 { margin: 0 0 15px 0; font-size: 12px; color: var(--accent); text-transform: uppercase; display: flex; justify-content: space-between; }
 
         textarea {
             background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 15px;
-            color: white; padding: 15px; height: 180px; resize: none; width: 100%; outline: none; font-size: 15px;
+            color: white; padding: 15px; height: 120px; width: 100%; outline: none; font-size: 15px; resize: none;
         }
 
         .btn {
             background: var(--accent); color: white; border: none; padding: 18px;
             border-radius: 20px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px;
         }
-        .btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
+        .history-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; font-size: 14px; border-left: 3px solid var(--accent); }
+
+        .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        .font-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px;
+            border-radius: 12px; color: white; cursor: pointer; text-align: center; font-size: 12px;
+        }
+        .font-btn.active { border-color: var(--accent); background: rgba(125, 95, 255, 0.2); }
+
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        input[type=range] { accent-color: var(--accent); cursor: pointer; flex: 1; margin-left: 15px; }
 
         #result-modal {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
-            border-radius: 40px; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
         }
-        .win-prize { font-size: 5rem; font-weight: 900; color: var(--accent); margin-bottom: 30px; text-align: center; }
+        .win-prize { font-size: 5rem; font-weight: 900; color: var(--accent); text-align: center; }
 
-        .preset-item {
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px;
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid transparent;
-        }
-        .preset-item:hover { border-color: var(--accent); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
+    <div id="snow-container"></div>
     <div class="bg-blobs"><div class="blob"></div></div>
 
     <div class="glass-card">
+        <div class="beta-badge">v2.4 Deluxe Адаптив</div>
+
         <div class="top-nav">
             <div class="nav-item active" data-tab="game">Колесо</div>
-            <div class="nav-item" data-tab="settings">Дизайн и Сохранения</div>
+            <div class="nav-item" data-tab="settings">Настройки и Пресеты</div>
         </div>
 
         <div id="game-tab" class="content-body active">
@@ -108,56 +132,67 @@
                     <h4>Варианты</h4>
                     <textarea id="itemsInput" oninput="draw()">Да\nНет\nНаверное\nПозже</textarea>
                 </div>
-                <button class="btn" onclick="spin()"><i class="fas fa-sync-alt"></i> ИСПЫТАТЬ</button>
-                <div style="margin-top: 20px; padding: 10px; opacity: 0.5; font-size: 12px; text-align: center;">
-                    Активный пресет: <br><b id="activePresetLabel" style="color: var(--accent); font-size: 14px;">Стандартный</b>
+                <button class="btn" onclick="spin()"><i class="fas fa-sync-alt"></i> ИСПЫТАТЬ УДАЧУ</button>
+
+                <div class="setting-card">
+                    <h4>История <i class="fas fa-trash-alt" style="cursor:pointer; opacity: 0.5;" onclick="clearHistory()"></i></h4>
+                    <div id="historyContainer" class="history-list">
+                        <div style="opacity: 0.3; font-size: 12px; text-align: center; margin-top: 10px;">История пуста...</div>
+                    </div>
                 </div>
             </div>
+
             <div class="wheel-section">
                 <div class="pointer"></div>
-                <canvas id="wheelCanvas" width="580" height="580"></canvas>
+                <canvas id="wheelCanvas" width="550" height="550"></canvas>
             </div>
         </div>
 
         <div id="settings-tab" class="content-body" style="flex-direction: column; overflow-y: auto;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                 <div class="setting-card">
-                    <h4>Выберите шрифт</h4>
+                    <h4>Шрифт текста</h4>
                     <div class="font-grid">
-                        <div class="font-btn active" style="font-family: 'Inter'" onclick="setFont('Inter', this)">Modern</div>
+                        <div class="font-btn active" onclick="setFont('Inter', this)">Modern</div>
                         <div class="font-btn" style="font-family: 'Oswald'" onclick="setFont('Oswald', this)">Strong</div>
                         <div class="font-btn" style="font-family: 'Pacifico'" onclick="setFont('Pacifico', this)">Retro</div>
-                        <div class="font-btn" style="font-family: 'Press Start 2P', cursive; font-size: 10px;" onclick="setFont('Press Start 2P', this)">8-Bit</div>
+                        <div class="font-btn" style="font-family: 'Press Start 2P'" onclick="setFont('Press Start 2P', this)">8-Bit</div>
                         <div class="font-btn" style="font-family: 'Unbounded'" onclick="setFont('Unbounded', this)">Future</div>
                     </div>
                     <div class="row" style="margin-top: 20px;">
                         <span>Размер: <b id="fontShow">18</b>px</span>
-                        <input type="range" id="fontSize" min="8" max="45" value="18" oninput="updateFontSize()">
+                        <input type="range" id="fontSize" min="10" max="40" value="18" oninput="updateFontSize()">
                     </div>
                 </div>
 
                 <div class="setting-card">
-                    <h4>Параметры</h4>
-                    <div class="row"><span>Время (сек): <b id="durShow">5</b></span> <input type="range" id="duration" min="2" max="20" value="5" oninput="document.getElementById('durShow').innerText=this.value"></div>
-                    <div class="row"><span>Центр (дыра)</span> <input type="range" id="innerRadius" min="0" max="150" value="50" oninput="draw()"></div>
+                    <h4>Параметры системы</h4>
+                    <div class="row"><span>Время (сек): <b id="durShow">5</b></span> <input type="range" id="duration" min="2" max="15" value="5" oninput="document.getElementById('durShow').innerText=this.value"></div>
                     <div class="row"><span>Цвет темы</span> <input type="color" id="accentCol" value="#7d5fff" oninput="updateTheme()"></div>
+                    <div class="row"><span>Дырка в центре</span> <input type="range" id="innerRadius" min="0" max="100" value="40" oninput="draw()"></div>
+                </div>
+
+                <div class="setting-card">
+                    <h4>Эффект снега</h4>
+                    <div class="row"><span>Кол-во</span> <input type="range" id="snowCount" min="0" max="200" value="70" oninput="initSnow()"></div>
+                    <div class="row"><span>Скорость</span> <input type="range" id="snowSpeed" min="5" max="30" value="15" oninput="initSnow()"></div>
                 </div>
             </div>
 
             <div class="setting-card" style="margin-top: 10px;">
-                <h4>Менеджер пресетов</h4>
-                <div class="row">
-                    <input type="text" id="presetName" placeholder="Название..." style="flex: 1; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--border); margin-right: 10px;">
-                    <button class="btn" style="width: 150px;" onclick="savePreset()">Сохранить</button>
+                <h4>Ваши Пресеты</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="presetName" placeholder="Назовите настройки..." style="flex: 1; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--border);">
+                    <button class="btn" style="width: auto; padding: 0 25px;" onclick="savePreset()">Сохранить</button>
                 </div>
-                <div id="presetsList" style="margin-top: 15px;"></div>
+                <div id="presetsList"></div>
             </div>
         </div>
 
         <div id="result-modal">
-            <div style="opacity: 0.5; letter-spacing: 4px; margin-bottom: 10px;">ВЫИГРЫШ</div>
+            <div style="opacity: 0.5; letter-spacing: 5px;">РЕЗУЛЬТАТ</div>
             <div class="win-prize" id="winPrize">...</div>
-            <button class="btn" style="width: 250px;" onclick="closeWin()">КРУТО!</button>
+            <button class="btn" style="width: 250px;" onclick="closeWin()">ПОНЯТНО</button>
         </div>
     </div>
 
@@ -167,23 +202,80 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let startAngle = 0, isSpinning = false, currentFont = 'Inter';
 
-        // Навигация
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                document.querySelectorAll('.content-body').forEach(b => b.classList.remove('active'));
-                item.classList.add('active');
-                document.getElementById(item.dataset.tab + '-tab').classList.add('active');
-                if(item.dataset.tab === 'game') draw();
-            });
-        });
+        // РИСОВАНИЕ (с учетом всех настроек)
+        function draw() {
+            const items = document.getElementById('itemsInput').value.split('\n').filter(t => t.trim() !== "");
+            if (!items.length) return;
+            const arc = (Math.PI * 2) / items.length;
+            const fSize = document.getElementById('fontSize').value;
+            const innerR = document.getElementById('innerRadius').value;
 
+            ctx.clearRect(0,0,550,550);
+            items.forEach((item, i) => {
+                const angle = startAngle + i * arc;
+                ctx.fillStyle = `hsla(${i * (360/items.length)}, 65%, 60%, 0.9)`;
+                ctx.beginPath(); ctx.moveTo(275, 275);
+                ctx.arc(275, 275, 260, angle, angle + arc); ctx.fill();
+
+                ctx.save();
+                ctx.fillStyle = "white";
+                ctx.font = `bold ${fSize}px "${currentFont}"`;
+                ctx.translate(275 + Math.cos(angle + arc/2) * 180, 275 + Math.sin(angle + arc/2) * 180);
+                ctx.rotate(angle + arc/2 + Math.PI);
+                ctx.fillText(item, -ctx.measureText(item).width/2, fSize/3);
+                ctx.restore();
+            });
+
+            // Дырка
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath(); ctx.arc(275, 275, innerR, 0, Math.PI*2); ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        // ВРАЩЕНИЕ (исправленная математика стрелки)
+        function spin() {
+            if (isSpinning) return;
+            const items = document.getElementById('itemsInput').value.split('\n').filter(t => t.trim() !== "");
+            if (items.length < 2) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            isSpinning = true;
+            const duration = document.getElementById('duration').value * 1000;
+            const startTime = performance.now();
+            const totalRotation = (Math.PI * 2 * 7) + (Math.random() * Math.PI * 2);
+            const initialAngle = startAngle;
+
+            function frame(now) {
+                const elapsed = now - startTime;
+                const p = elapsed / duration;
+                if (p < 1) {
+                    const easeOut = 1 - Math.pow(1 - p, 4);
+                    startAngle = initialAngle + (totalRotation * easeOut);
+                    draw();
+                    requestAnimationFrame(frame);
+                } else {
+                    isSpinning = false;
+                    const arc = (Math.PI * 2) / items.length;
+                    const normalized = (startAngle % (Math.PI * 2));
+                    let winIdx = Math.floor((1.5 * Math.PI - normalized) / arc) % items.length;
+                    if (winIdx < 0) winIdx += items.length;
+
+                    const res = items[winIdx];
+                    document.getElementById('winPrize').innerText = res;
+                    document.getElementById('result-modal').style.display = 'flex';
+                    addToHistory(res);
+                    confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // ФУНКЦИИ ИНТЕРФЕЙСА
         function setFont(f, el) {
             currentFont = f;
             document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            // Ждем загрузки шрифта браузером перед отрисовкой
-            document.fonts.load(`1em ${f}`).then(() => draw());
+            if(el) el.classList.add('active');
+            draw();
         }
 
         function updateFontSize() {
@@ -192,137 +284,102 @@
         }
 
         function updateTheme() {
-            document.documentElement.style.setProperty('--accent', document.getElementById('accentCol').value);
+            const c = document.getElementById('accentCol').value;
+            document.documentElement.style.setProperty('--accent', c);
             draw();
         }
 
-        function draw() {
-            const items = document.getElementById('itemsInput').value.split('\n').filter(t => t.trim() !== "");
-            if (!items.length) return;
-            const arc = (Math.PI * 2) / items.length;
-            const fSize = document.getElementById('fontSize').value;
-            const innerR = document.getElementById('innerRadius').value;
-
-            ctx.clearRect(0,0,580,580);
-            items.forEach((item, i) => {
-                const angle = startAngle + i * arc;
-                ctx.fillStyle = `hsla(${i * (360/items.length)}, 65%, 60%, 0.85)`;
-                ctx.beginPath(); ctx.moveTo(290, 290);
-                ctx.arc(290, 290, 280, angle, angle + arc); ctx.fill();
-
-                ctx.save();
-                ctx.fillStyle = "white";
-                ctx.font = `bold ${fSize}px "${currentFont}"`;
-                ctx.translate(290 + Math.cos(angle + arc/2) * 190, 290 + Math.sin(angle + arc/2) * 190);
-                ctx.rotate(angle + arc/2 + Math.PI);
-                ctx.fillText(item, -ctx.measureText(item).width/2, fSize/3);
-                ctx.restore();
-            });
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.arc(290, 290, innerR, 0, Math.PI*2); ctx.fill();
-            ctx.globalCompositeOperation = 'source-over';
+        function addToHistory(item) {
+            const container = document.getElementById('historyContainer');
+            if (container.innerText.includes('История пуста')) container.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `<small style="opacity:0.5">${new Date().toLocaleTimeString()}</small><br><b>${item}</b>`;
+            container.prepend(div);
+            if (container.children.length > 10) container.lastChild.remove();
         }
 
-        function spin() {
-            if (isSpinning) return;
-            const items = document.getElementById('itemsInput').value.split('\n').filter(t => t.trim() !== "");
-            if (items.length < 2) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            isSpinning = true;
-            const duration = parseInt(document.getElementById('duration').value) * 1000;
-            const startTime = performance.now();
-            const rotateForce = 45 + Math.random() * 45;
-            const arc = (Math.PI * 2) / items.length;
-            let lastTick = 0;
-
-            function frame(now) {
-                const elapsed = now - startTime;
-                const p = elapsed / duration;
-                if (p < 1) {
-                    const easeOut = 1 - Math.pow(p, 4);
-                    startAngle += (rotateForce * easeOut) * (Math.PI / 180);
-                    if (Math.abs(startAngle - lastTick) > arc) {
-                        const osc = audioCtx.createOscillator();
-                        const g = audioCtx.createGain();
-                        osc.type = 'sine'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                        g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                        osc.connect(g); g.connect(audioCtx.destination);
-                        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-                        lastTick = startAngle;
-                    }
-                    draw();
-                    requestAnimationFrame(frame);
-                } else {
-                    isSpinning = false;
-                    const index = Math.floor((Math.PI * 2 - (startAngle % (Math.PI * 2))) / arc) % items.length;
-                    document.getElementById('winPrize').innerText = items[index];
-                    document.getElementById('result-modal').style.display = 'flex';
-                    confetti({ particleCount: 200, spread: 80 });
-                }
-            }
-            requestAnimationFrame(frame);
+        function clearHistory() {
+            document.getElementById('historyContainer').innerHTML = '<div style="opacity: 0.3; font-size: 12px; text-align: center; margin-top: 10px;">История пуста...</div>';
         }
 
         function closeWin() { document.getElementById('result-modal').style.display = 'none'; }
 
+        // ПРЕСЕТЫ
         function savePreset() {
-            const name = document.getElementById('presetName').value;
-            if (!name) return;
+            const n = document.getElementById('presetName').value;
+            if (!n) return;
             const data = {
                 items: document.getElementById('itemsInput').value,
                 font: currentFont,
-                fSize: document.getElementById('fontSize').value,
-                dur: document.getElementById('duration').value,
+                size: document.getElementById('fontSize').value,
                 acc: document.getElementById('accentCol').value,
                 inner: document.getElementById('innerRadius').value
             };
-            let all = JSON.parse(localStorage.getItem('luxury_p_v2') || '{}');
-            all[name] = data;
-            localStorage.setItem('luxury_p_v2', JSON.stringify(all));
+            let all = JSON.parse(localStorage.getItem('wheel_v2_final') || '{}');
+            all[n] = data;
+            localStorage.setItem('wheel_v2_final', JSON.stringify(all));
             renderPresets();
         }
 
         function renderPresets() {
             const list = document.getElementById('presetsList');
-            const all = JSON.parse(localStorage.getItem('luxury_p_v2') || '{}');
+            const all = JSON.parse(localStorage.getItem('wheel_v2_final') || '{}');
             list.innerHTML = '';
             Object.keys(all).forEach(k => {
                 const div = document.createElement('div');
-                div.className = 'preset-item';
-                div.innerHTML = `<span style="cursor:pointer; font-weight:bold" onclick="applyPreset('${k}')">${k}</span><i class="fas fa-trash" style="color:#ff4757; cursor:pointer" onclick="deletePreset('${k}')"></i>`;
+                div.className = 'history-item';
+                div.style.display = 'flex'; div.style.justifyContent = 'space-between';
+                div.innerHTML = `<span onclick="applyPreset('${k}')" style="cursor:pointer">💾 ${k}</span><i class="fas fa-trash" onclick="deletePreset('${k}')" style="color:#ff4757; cursor:pointer"></i>`;
                 list.appendChild(div);
             });
         }
 
-        function applyPreset(name) {
-            const p = JSON.parse(localStorage.getItem('luxury_p_v2'))[name];
+        function applyPreset(n) {
+            const p = JSON.parse(localStorage.getItem('wheel_v2_final'))[n];
             document.getElementById('itemsInput').value = p.items;
-            document.getElementById('fontSize').value = p.fSize;
-            document.getElementById('duration').value = p.dur;
+            document.getElementById('fontSize').value = p.size;
             document.getElementById('accentCol').value = p.acc;
             document.getElementById('innerRadius').value = p.inner;
-
-            // Находим кнопку шрифта и активируем
-            const buttons = document.querySelectorAll('.font-btn');
-            buttons.forEach(btn => {
-                if(btn.innerText.toLowerCase().includes(p.font.toLowerCase()) || btn.style.fontFamily.includes(p.font)) {
-                    setFont(p.font, btn);
-                }
-            });
-
-            document.getElementById('activePresetLabel').innerText = name;
-            document.getElementById('fontShow').innerText = p.fSize;
-            document.getElementById('durShow').innerText = p.dur;
+            currentFont = p.font;
             updateTheme();
+            updateFontSize();
         }
 
         function deletePreset(n) {
-            let all = JSON.parse(localStorage.getItem('luxury_p_v2'));
-            delete all[n]; localStorage.setItem('luxury_p_v2', JSON.stringify(all));
+            let all = JSON.parse(localStorage.getItem('wheel_v2_final'));
+            delete all[n]; localStorage.setItem('wheel_v2_final', JSON.stringify(all));
             renderPresets();
         }
 
+        // НАВИГАЦИЯ
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.content-body').forEach(b => b.classList.remove('active'));
+                item.classList.add('active');
+                document.getElementById(item.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // СНЕГ
+        function initSnow() {
+            const container = document.getElementById('snow-container');
+            container.innerHTML = '';
+            const count = document.getElementById('snowCount').value;
+            for (let i = 0; i < count; i++) {
+                const f = document.createElement('div');
+                f.className = 'snowflake';
+                const size = Math.random() * 4 + 2;
+                f.style.width = size+'px'; f.style.height = size+'px';
+                f.style.left = Math.random()*100+'%';
+                f.style.opacity = Math.random();
+                container.appendChild(f);
+                f.animate([{transform:'translateY(-10px)'},{transform:`translateY(100vh) translateX(${Math.random()*40}px)`}], {duration:Math.random()*5000+5000, iterations:Infinity});
+            }
+        }
+
+        initSnow();
         renderPresets();
         draw();
     </script>
