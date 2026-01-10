@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Колесо Фортуны Deluxe v3.1</title>
+    <title>Колесо Фортуны | Бета-тест</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@700&family=Pacifico&family=Press+Start+2P&family=Unbounded:wght@900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -17,6 +17,131 @@
             --text: #ffffff;
             --blur: 25px;
         }
+        /* ===================== */
+/* 📱 МОБИЛЬНЫЕ (до 600px) */
+/* ===================== */
+@media (max-width: 600px) {
+
+    body {
+        padding: 8px;
+    }
+
+    .glass-card {
+        border-radius: 20px;
+    }
+
+    .top-nav {
+        justify-content: center;
+        gap: 30px;
+        padding: 15px;
+    }
+
+    .content-body {
+        flex-direction: column !important;
+        padding: 15px;
+        height: auto !important;
+    }
+
+    .sidebar {
+        order: 2;
+        padding-right: 0 !important;
+    }
+
+    .wheel-section {
+        order: 1;
+        margin-bottom: 20px;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 320px;
+    }
+
+    .pointer {
+        width: 22px;
+        height: 28px;
+    }
+
+    textarea {
+        height: 80px;
+        font-size: 14px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .setting-card {
+        padding: 15px;
+    }
+
+    .win-prize {
+        font-size: 2.8rem !important;
+        text-align: center;
+    }
+}
+
+/* ===================== */
+/* 📱 ПЛАНШЕТЫ (600–900px) */
+/* ===================== */
+@media (min-width: 601px) and (max-width: 900px) {
+
+    .content-body {
+        flex-direction: column;
+        height: auto !important;
+    }
+
+    .sidebar {
+        order: 2;
+    }
+
+    .wheel-section {
+        order: 1;
+        margin-bottom: 25px;
+    }
+
+    canvas {
+        max-width: 420px;
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* ===================== */
+/* 💻 МАЛЫЕ НОУТБУКИ */
+/* ===================== */
+@media (max-width: 1100px) {
+
+    .glass-card {
+        max-width: 95vw;
+    }
+
+    .content-body {
+        gap: 20px;
+    }
+}
+
+/* ===================== */
+/* 🖥️ 4K И БОЛЬШИЕ ЭКРАНЫ */
+/* ===================== */
+@media (min-width: 1800px) {
+
+    .glass-card {
+        max-width: 1400px;
+    }
+
+    canvas {
+        max-width: 650px;
+    }
+
+    .btn {
+        font-size: 18px;
+    }
+}
+
 
         * { box-sizing: border-box; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
 
